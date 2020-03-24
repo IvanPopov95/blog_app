@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <p> Do you want delete this article ({{ article.title }}) ? </p>
+  <div>
+    <form method="POST">
+      {% csrf_token %}
+      <button> Delete </button>
+    </form>
+  </div>
+</body>
+</html>
