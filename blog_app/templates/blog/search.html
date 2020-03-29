@@ -1,0 +1,24 @@
+<!DOCTYPE html> 
+<html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <title>Search</title> 
+</head> 
+<body>
+    <form method="GET">
+        <input type="text"  name="q" placeholder="Search...">
+    </form>
+    {% if query %}
+    <div class="container">
+        {% block content %}
+          {% for i in object_list %}
+              <div class="article">
+               <h3><a href="{% url 'detail' i.slug %}">{{ i.title }}</a></h3>
+                <p>{{ i.body }}</p>
+             </div>
+          {% endfor %}
+         {% endblock content %}
+      </div>  
+    {%endif%}
+</body> 
+</html>
