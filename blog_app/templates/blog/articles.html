@@ -17,6 +17,11 @@
              <div class="article">
               <h3><a href="{% url 'detail' i.slug %}">{{ i.title }}</a></h3>
                <p>{{ i.body }}</p>
+               {% if i.updated is not None %}
+               <p>Article updated: {{ i.updated }}</p>
+               {% else %}
+               <p>Article created: {{ i.created }}</p>
+               {% endif %}
             </div>
          {% endfor %}
         {% endblock content %}

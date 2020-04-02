@@ -7,6 +7,13 @@ class Article(models.Model):
     title = models.CharField(max_length= 100)
     body = models.TextField()
     slug = models.SlugField(db_index=True, null=True)
+    created = models.DateTimeField(default=timezone.now, editable=False)
+    updated = models.DateTimeField(null=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.created < timezone.now():
+            self.updated = timezone.now()
+        super(Article, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -18,7 +25,7 @@ class Comment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
     body = models.TextField()
     author = models.ForeignKey('auth.User', on_delete = models.CASCADE, null=True)
-    date_posted = models.DateTimeField(default=timezone.now)
+    date_posted = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
         return self.body
