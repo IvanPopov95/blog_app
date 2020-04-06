@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, UpdateView
-from .models import Article
+from django.views.generic import ListView, UpdateView, RedirectView
+from .models import Article, ArticleLikes
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import AccessMixin
 from .forms import CreateArticleForm, CommentForm
 from django.db.models import Q
+from django.utils import timezone
 
 class ArticleListView(ListView):
     model = Article
@@ -31,12 +32,19 @@ def article_detail_view(request, slug):
                                         'comments': comments, 
                                         'new_comment': new_comment, 
                                         'form': form})
-        
+
+@login_required
+def like(request, slug):
+        article = get_object_or_404(Article, slug=slug)
+        like, created = ArticleLikes.objects.get_or_create(article=article, user=request.user)
+        if not created:
+            like.delete()
+        return redirect('detail', slug=slug)
+
 
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
-        
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
@@ -78,13 +86,12 @@ class ArticleUpdateView(AccessMixin, UpdateView):
             return redirect('login')
         if not self.request.user == self.get_object().author:
             return redirect('login')
-        
         return super().dispatch(request, *args, **kwargs)
     
     def get_object(self):
         slug = self.kwargs.get("slug")
         return get_object_or_404(Article, slug=slug)
-
+     
 
 class SearchView(ListView):
     model = Article

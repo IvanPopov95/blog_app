@@ -19,7 +19,11 @@ class Article(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('detail', args=[str(self.slug)])    
+        return reverse('detail', args=[str(self.slug)])
+    
+    def like_count(self):
+        return ArticleLikes.objects.filter(article=self).count()
+
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
@@ -29,3 +33,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+class ArticleLikes(models.Model):
+    user = models.ForeignKey('auth.user', on_delete=models.CASCADE, null=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='likes')

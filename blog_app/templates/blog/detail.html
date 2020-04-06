@@ -18,6 +18,10 @@
          </div>
      {% endblock content %}
      </div>
+     <h5>Likes : {{ article.like_count }}</h5>
+     <p><a href="{% url 'like' article.slug %}">Like </a></p> 
+
+     
      <p><a href="{% url 'delete' article.slug %}">Delete this article</a></p>
      <p><a href="{% url 'update' article.slug %}">Update this article</a></p>
      {% for comment in comments %}
