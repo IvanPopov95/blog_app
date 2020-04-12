@@ -10,7 +10,9 @@
      <header>
        <h1> <a href="">Blog</a> </h1>
      </header>
-     <p><a href="{% url 'search' %}">Search Page</a></p>
+     <h4><a href="{% url 'profile_page' %}">Profile Page</a></h4>
+
+     <h4><a href="{% url 'search' %}">Search Page</a></h4>
      <div class="container">
        {% block content %}
          {% for i in object_list %}

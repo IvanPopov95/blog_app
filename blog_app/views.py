@@ -1,18 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, UpdateView, RedirectView
-from .models import Article, ArticleLikes
+from django.views.generic import ListView, UpdateView
+from .models import Article, ArticleLikes, Profile, Comment
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import AccessMixin
-from .forms import CreateArticleForm, CommentForm
+from .forms import CreateArticleForm, CommentForm, UserForm, ProfileForm
 from django.db.models import Q
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.contrib import messages
+
 
 class ArticleListView(ListView):
     model = Article
     template_name = 'blog/articles.html'
     paginate_by = 3
+
 
 def article_detail_view(request, slug):
     template_name = 'blog/detail.html'
@@ -32,6 +36,7 @@ def article_detail_view(request, slug):
                                         'comments': comments, 
                                         'new_comment': new_comment, 
                                         'form': form})
+
 
 @login_required
 def like(request, slug):
@@ -77,6 +82,7 @@ def delete_article_view(request, slug):
         return redirect('articles')
     return render(request, "blog/delete_article.html", {"article": article})
 
+
 class ArticleUpdateView(AccessMixin, UpdateView):
     template_name = 'blog/create_article.html'
     form_class = CreateArticleForm
@@ -114,3 +120,35 @@ class SearchView(ListView):
         query = self.request.GET.get('q')
         context['query'] = query
         return context
+
+
+@login_required
+def profile_view(request):
+    template_name = 'blog/profile_page.html'
+    user = request.user
+    user_comments = Comment.objects.filter(author=user)
+    user_articles = Article.objects.filter(author=user)
+    user_likes = ArticleLikes.objects.filter(user=user)
+    return render(request, template_name, {'user_comments': user_comments,
+                                          'user_articles':  user_articles,
+                                          'user_likes': user_likes})
+
+
+@login_required
+def update_profile_view(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, ('Your profile was successfully updated!'))
+            return redirect('profile_page')
+        else:
+            messages.error(request, ('Please correct the error.'))
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
+    return render(request, 'blog/update_profile.html', {
+                                            'user_form': user_form,
+                                            'profile_form': profile_form})

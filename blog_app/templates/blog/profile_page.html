@@ -1,0 +1,31 @@
+<!DOCTYPE html> 
+<html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <title>Profile Page</title> 
+</head> 
+<body>
+    <header>
+    <h1> <a href="{% url 'articles' %}">Homepage</a> </h1>
+    </header>
+    <li>Username: {{ user.username }}</li>
+    <li>Location: {{ user.profile.location }}</li>
+    <li>Birth Date: {{ user.profile.birth_date }}</li>
+    <h4><a href="{% url 'update_profile' %}">Update your profile</a></h4>
+    <h3>User's articles</h3>
+    {% for article in user_articles %}
+    <h4><a href="{% url 'detail' article.slug %}">{{ article.title }}</a></h4>
+    {% endfor %}
+
+    <h3>User's comments</h3>
+    {% for comment in user_comments %}
+    <h4><a href="{% url 'detail' comment.article.slug %}">{{ comment.article.title }}</a></h4>
+    <h5>{{ comment.body  }}</h5>
+    {% endfor %}
+
+    <h3>Articles, what you liked</h3>
+    {% for like in user_likes %}
+    <h4><a href="{% url 'detail' like.article.slug %}">{{ like.article.title }}</a></h4>
+    {% endfor %}    
+</body> 
+</html>
