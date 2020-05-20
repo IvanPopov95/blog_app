@@ -1,15 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, UpdateView
 from .models import Article, ArticleLikes, Profile, Comment
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import AccessMixin
-from .forms import CreateArticleForm, CommentForm, UserForm, ProfileForm
+from .forms import CreateArticleForm, CommentForm, UserForm, ProfileForm, MyUserCreationForm
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.mail import send_mail
+from blog import settings
+
 
 
 class ArticleListView(ListView):
@@ -49,16 +51,18 @@ def like(request, slug):
 
 def register(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = MyUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
-            user = authenticate(username=username, password=password)
+            email = form.cleaned_data['email']
+            user = authenticate(username=username, password=password, email=email)
             login(request, user)
-            return redirect('articles')
+            send_confirmation_email(request, email)
+            return render(request, 'registration/email.html')
     else:
-        form = UserCreationForm()
+        form = MyUserCreationForm()
         context = {'form' : form}
         return render(request, 'registration/register.html', context)
 
@@ -152,3 +156,10 @@ def update_profile_view(request):
     return render(request, 'blog/update_profile.html', {
                                             'user_form': user_form,
                                             'profile_form': profile_form})
+
+
+def send_confirmation_email(request, email):
+    send_mail('Hello',
+    settings.EMAIL_CONFIRMATION_TEXT,
+    settings.EMAIL_HOST_USER,
+    [email])
